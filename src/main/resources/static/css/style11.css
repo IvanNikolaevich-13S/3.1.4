@@ -1,0 +1,31 @@
+.delete-form {
+    display: inline;
+    margin-left: 15px;
+    width: 25px;
+
+}
+
+.edit-form{
+    display: inline;
+    margin-left: 10px;
+}
+
+.logout-form{
+
+
+    margin-top: -22px;
+    float: right;
+
+}
+
+
+.new-form{
+    display: inline;
+
+}
+
+.href{
+    color: inherit;
+}
+
+
