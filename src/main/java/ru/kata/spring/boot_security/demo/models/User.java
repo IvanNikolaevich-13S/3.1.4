@@ -34,7 +34,6 @@ public class User implements UserDetails {
 
     @Column(name = "password")
     @NotEmpty(message = "Имя не может быть пустым!")
-    @Pattern(regexp = "^[a-zA-ZА-Яа-я0-9]*$", message = "Вы ввели неккоретное имя!")
     private String password;
 
     @Column(name = "first_name")
@@ -51,11 +50,6 @@ public class User implements UserDetails {
     @Column(name = "email")
     private String email;
 
-
-    @Column(name = "username")
-
-    private String username;
-
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "users_roles",
@@ -64,9 +58,13 @@ public class User implements UserDetails {
     )
     private List<Role> roles;
 
-    public User(String password, String username) {
+    public User(String password, String name, String surname, int age, String email, List<Role> roles) {
         this.password = password;
-        this.username = username;
+        this.name = name;
+        this.surname = surname;
+        this.age = age;
+        this.email = email;
+        this.roles = roles;
     }
 
     @Override

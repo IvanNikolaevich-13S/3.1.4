@@ -1,10 +1,13 @@
 package ru.kata.spring.boot_security.demo.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import ru.kata.spring.boot_security.demo.Util.UserValidator;
 import ru.kata.spring.boot_security.demo.models.Role;
 import ru.kata.spring.boot_security.demo.models.User;
 import ru.kata.spring.boot_security.demo.service.RoleService;
@@ -19,10 +22,17 @@ public class AdminController {
     private final UserService userService;
     private final RoleService roleService;
 
+    private final UserValidator userValidator;
+
+    private final BCryptPasswordEncoder passwordEncoder;
+
     @Autowired
-    public AdminController(UserService userService, RoleService roleService) {
+    public AdminController(UserService userService, RoleService roleService, UserValidator userValidator, PasswordEncoder passwordEncoder, BCryptPasswordEncoder passwordEncoder1) {
         this.userService = userService;
         this.roleService = roleService;
+        this.userValidator = userValidator;
+
+        this.passwordEncoder = passwordEncoder1;
     }
 
     @GetMapping
@@ -41,8 +51,10 @@ public class AdminController {
 
     @PostMapping
     public String addUser(@ModelAttribute("newUser") @Valid User user,
-                          @RequestParam(value = "roles", required = false) List<Integer> roles,
-                          BindingResult bindingResult){
+                          BindingResult bindingResult,
+                          @RequestParam(value = "roles", required = false) List<Integer> roles){
+
+
         if(bindingResult.hasErrors()) {
             return "new";
         }
@@ -51,6 +63,7 @@ public class AdminController {
             roles2.add(roleService.findOne(id));
         }
         user.setRoles(roles2);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userService.save(user);
         return  "redirect:/admin";
     }
@@ -66,8 +79,8 @@ public class AdminController {
 
     @PatchMapping("/{id}")
     public String editUser(@PathVariable("id") int id, @ModelAttribute @Valid User user,
-                           @RequestParam(value = "roles", required = false) List<Integer> roles,
-                           BindingResult bindingResult) {
+                           BindingResult bindingResult,
+                           @RequestParam(value = "roles", required = false) List<Integer> roles) {
         if(bindingResult.hasErrors()) {
             return "edit";
         }
@@ -76,6 +89,7 @@ public class AdminController {
             roles2.add(roleService.findOne(id2));
         }
         user.setRoles(roles2);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userService.update(id,user);
         return "redirect:/admin";
     }

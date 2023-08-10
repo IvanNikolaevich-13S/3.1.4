@@ -68,8 +68,8 @@ public class UserService implements UserDetailsService {
         userRepository.deleteById(id);
     }
 
-    public User findByEmail(String username) {
-        User user = userRepository.findByEmail(username);
+    public User findByEmail(String email) {
+        User user = userRepository.findByEmail(email);
         Hibernate.initialize(user.getRoles());
         return user;
     }
@@ -81,15 +81,8 @@ public class UserService implements UserDetailsService {
         if (user == null) {
             throw new UsernameNotFoundException("Пользователь не найден!");
         }
-        List<GrantedAuthority> grantedAuthorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
-                .collect(Collectors.toList());
 
-        return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getPassword(),
-                grantedAuthorities
-        );
+        return  user;
     }
 
 }
