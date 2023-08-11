@@ -53,6 +53,7 @@ public class AdminController {
     public String addUser(@ModelAttribute("newUser") @Valid User user,
                           BindingResult bindingResult,
                           @RequestParam(value = "roles", required = false) List<Integer> roles){
+        userValidator.validate(user,bindingResult);
 
 
         if(bindingResult.hasErrors()) {
