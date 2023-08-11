@@ -24,15 +24,15 @@ public class AdminController {
 
     private final UserValidator userValidator;
 
-    private final BCryptPasswordEncoder passwordEncoder;
+
 
     @Autowired
-    public AdminController(UserService userService, RoleService roleService, UserValidator userValidator, PasswordEncoder passwordEncoder, BCryptPasswordEncoder passwordEncoder1) {
+    public AdminController(UserService userService, RoleService roleService, UserValidator userValidator) {
         this.userService = userService;
         this.roleService = roleService;
         this.userValidator = userValidator;
 
-        this.passwordEncoder = passwordEncoder1;
+
     }
 
     @GetMapping
@@ -64,7 +64,7 @@ public class AdminController {
             roles2.add(roleService.findOne(id));
         }
         user.setRoles(roles2);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         userService.save(user);
         return  "redirect:/admin";
     }
@@ -90,7 +90,7 @@ public class AdminController {
             roles2.add(roleService.findOne(id2));
         }
         user.setRoles(roles2);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         userService.update(id,user);
         return "redirect:/admin";
     }

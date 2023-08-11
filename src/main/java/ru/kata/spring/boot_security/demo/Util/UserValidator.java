@@ -7,14 +7,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import ru.kata.spring.boot_security.demo.models.User;
-import ru.kata.spring.boot_security.demo.service.UserService;
+import ru.kata.spring.boot_security.demo.service.UserValidService;
+
 @Component
 public class UserValidator implements Validator {
-    public final UserService userService;
+    public final UserValidService userValidService;
 
     @Autowired
-    public UserValidator(UserService userService) {
-        this.userService = userService;
+    public UserValidator(UserValidService userValidService) {
+        this.userValidService = userValidService;
     }
 
     @Override
@@ -26,12 +27,8 @@ public class UserValidator implements Validator {
     public void validate(Object target, Errors errors) {
         User user = (User) target;
 
-        try {
-            userService.loadUserByUsername(user.getUsername());
-        } catch (UsernameNotFoundException ignored){
-            return;
+        if(userValidService.loadUserByUsername(user.getUsername()) != null){
+               errors.rejectValue("email","", "Человек с таким email существует!");
         }
-
-        errors.rejectValue("email","", "Человек с таким email существует!");
     }
 }
