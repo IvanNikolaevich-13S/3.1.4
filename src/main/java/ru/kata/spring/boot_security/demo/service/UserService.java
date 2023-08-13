@@ -71,9 +71,7 @@ public class UserService implements UserDetailsService {
     }
 
     public User findByEmail(String email) {
-        User user = userRepository.findByEmail(email);
-        Hibernate.initialize(user.getRoles());
-        return user;
+        return userRepository.findByEmail(email);
     }
 
     @Override
@@ -83,6 +81,7 @@ public class UserService implements UserDetailsService {
         if (user == null) {
             throw new UsernameNotFoundException("Пользователь не найден!");
         }
+        Hibernate.initialize(user.getRoles());
 
         return  user;
     }

@@ -1,5 +1,6 @@
 package ru.kata.spring.boot_security.demo.service;
 
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +21,9 @@ public class RoleService {
     }
 
     public List<Role> findALL(){
-        return roleRepository.findAll();
+
+
+        return  roleRepository.findAll();
     }
 
     public Role findOne(int id) {

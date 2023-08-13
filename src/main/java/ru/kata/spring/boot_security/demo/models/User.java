@@ -33,11 +33,9 @@ public class User implements UserDetails {
     private int id;
 
     @Column(name = "password")
-    @NotEmpty(message = "Имя не может быть пустым!")
     private String password;
 
     @Column(name = "first_name")
-    @Pattern(regexp = "^[a-zA-ZА-Яа-я0-9]*$", message = "Вы ввели неккоретную фамлию!")
     private String name;
 
     @Column(name = "last_name")

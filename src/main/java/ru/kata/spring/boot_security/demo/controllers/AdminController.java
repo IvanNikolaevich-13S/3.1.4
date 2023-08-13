@@ -1,8 +1,9 @@
 package ru.kata.spring.boot_security.demo.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -15,17 +16,15 @@ import ru.kata.spring.boot_security.demo.service.UserService;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
     private final UserService userService;
     private final RoleService roleService;
-
     private final UserValidator userValidator;
-
-
-
+    
     @Autowired
     public AdminController(UserService userService, RoleService roleService, UserValidator userValidator) {
         this.userService = userService;
@@ -37,64 +36,57 @@ public class AdminController {
 
     @GetMapping
     public String adminHomePage(Model model) {
+        User admin = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        model.addAttribute("admin", admin);
         model.addAttribute("users", userService.findAll());
+        model.addAttribute("roles", roleService.findALL());
+
+        if (!model.containsAttribute("newUser")) {
+            model.addAttribute("newUser", new User());
+        }
         return "admin";
     }
 
-
-    //Добавление
-    @GetMapping("/new")
-    public String newUser(Model model,@ModelAttribute("newUser") User user){
-        model.addAttribute("roles",roleService.findALL());
-        return "new";
-    }
-
     @PostMapping
-    public String addUser(@ModelAttribute("newUser") @Valid User user,
+    public String addUser(Model model,@ModelAttribute("newUser") @Valid User user,
                           BindingResult bindingResult,
-                          @RequestParam(value = "roles", required = false) List<Integer> roles){
+                          @RequestParam(value = "roles2", required = false) List<Integer> roles){
+
+
         userValidator.validate(user,bindingResult);
 
 
         if(bindingResult.hasErrors()) {
-            return "new";
+            User admin = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+            model.addAttribute("admin", admin);
+            model.addAttribute("users", userService.findAll());
+            model.addAttribute("roles", roleService.findALL());
+            model.addAttribute("newUser", user);
+            return "admin";
         }
-        List<Role> roles2 = new ArrayList<>();
-        for (int id: roles){
-            roles2.add(roleService.findOne(id));
-        }
-        user.setRoles(roles2);
+
+        user.setRoles(roles.stream().map(roleService::findOne).collect(Collectors.toList()));
+
 
         userService.save(user);
         return  "redirect:/admin";
     }
 
-
-    //Обновление
-    @GetMapping("/{id}/edit")
-    public String editPage(@PathVariable("id") int id, Model model){
-        model.addAttribute("editUser", userService.findOne(id));
-        model.addAttribute("roles", roleService.findALL());
-        return "edit";
-    }
-
     @PatchMapping("/{id}")
-    public String editUser(@PathVariable("id") int id, @ModelAttribute @Valid User user,
+    public String editUser(Model model,@PathVariable("id") int id, @ModelAttribute("user") @Valid User user,
                            BindingResult bindingResult,
-                           @RequestParam(value = "roles", required = false) List<Integer> roles) {
+                           @RequestParam(value = "role1", required = false) List<Integer> roles) {
         if(bindingResult.hasErrors()) {
-            return "edit";
+            return adminHomePage(model);
         }
-        List<Role> roles2 = new ArrayList<>();
-        for (int id2: roles){
-            roles2.add(roleService.findOne(id2));
-        }
-        user.setRoles(roles2);
 
+        user.setRoles(roles.stream().map(roleService::findOne).collect(Collectors.toList()));
         userService.update(id,user);
+
         return "redirect:/admin";
     }
-
 
     @DeleteMapping("/{id}")
     public String deleteUser(@PathVariable("id") int id){
