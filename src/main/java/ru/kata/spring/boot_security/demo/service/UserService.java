@@ -71,7 +71,9 @@ public class UserService implements UserDetailsService {
     }
 
     public User findByEmail(String email) {
-        return userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email);
+        Hibernate.initialize(user.getRoles());
+        return user;
     }
 
     @Override

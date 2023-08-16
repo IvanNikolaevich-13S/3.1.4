@@ -3,6 +3,7 @@ package ru.kata.spring.boot_security.demo.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,9 +36,7 @@ public class AdminController {
     }
 
     @GetMapping
-    public String adminHomePage(Model model) {
-        User admin = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
+    public String adminHomePage(Model model, @AuthenticationPrincipal User admin) {
         model.addAttribute("admin", admin);
         model.addAttribute("users", userService.findAll());
         model.addAttribute("roles", roleService.findALL());
@@ -77,9 +76,10 @@ public class AdminController {
     @PatchMapping("/{id}")
     public String editUser(Model model,@PathVariable("id") int id, @ModelAttribute("user") @Valid User user,
                            BindingResult bindingResult,
-                           @RequestParam(value = "role1", required = false) List<Integer> roles) {
+                           @RequestParam(value = "role1", required = false) List<Integer> roles,
+                            @AuthenticationPrincipal User admin){
         if(bindingResult.hasErrors()) {
-            return adminHomePage(model);
+            return adminHomePage(model, admin);
         }
 
         user.setRoles(roles.stream().map(roleService::findOne).collect(Collectors.toList()));

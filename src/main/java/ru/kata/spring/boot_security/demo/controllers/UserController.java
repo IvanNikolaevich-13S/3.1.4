@@ -3,6 +3,7 @@ package ru.kata.spring.boot_security.demo.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.Banner;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -24,10 +25,7 @@ public class UserController {
     }
 
     @GetMapping()
-    public String currentUserPage(Model model){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-
+    public String currentUserPage(Model model, @AuthenticationPrincipal UserDetails userDetails){
         if(userDetails!=null){
             String email = userDetails.getUsername();
             User user = userService.findByEmail(email);
