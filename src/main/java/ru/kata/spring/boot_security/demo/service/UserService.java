@@ -22,38 +22,20 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class UserService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
-
-    private UserRepository userRepository;
-    private RoleRepository roleRepository;
+    private final UserRepository userRepository;
 
     @Autowired
     public UserService(@Lazy PasswordEncoder passwordEncoder, UserRepository userRepository, RoleRepository roleRepository) {
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
     }
 
     public List<User> findAll() {
-        List<User> users = userRepository.findAll();
-        for (User user:users){
-            Hibernate.initialize(user.getRoles());
-        }
-        return users;
-    }
-
-    public User findOne(int id) {
-        Optional<User> foundUser = userRepository.findById(id);
-        User user = null;
-        if (foundUser.isPresent()) {
-            user = foundUser.get();
-            Hibernate.initialize(user.getRoles());
-        }
-        return user;
+        return userRepository.findAll() ;
     }
 
     @Transactional
     public void save(User user) {
-
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
     }
@@ -71,9 +53,7 @@ public class UserService implements UserDetailsService {
     }
 
     public User findByEmail(String email) {
-        User user = userRepository.findByEmail(email);
-        Hibernate.initialize(user.getRoles());
-        return user;
+        return userRepository.findByEmail(email);
     }
 
     @Override

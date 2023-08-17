@@ -1,21 +1,18 @@
 package ru.kata.spring.boot_security.demo.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.Util.UserValidator;
-import ru.kata.spring.boot_security.demo.models.Role;
 import ru.kata.spring.boot_security.demo.models.User;
 import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,19 +22,20 @@ public class AdminController {
     private final UserService userService;
     private final RoleService roleService;
     private final UserValidator userValidator;
-    
+
+    private   UserDetails admin;
+
     @Autowired
     public AdminController(UserService userService, RoleService roleService, UserValidator userValidator) {
         this.userService = userService;
         this.roleService = roleService;
         this.userValidator = userValidator;
-
-
     }
 
     @GetMapping
-    public String adminHomePage(Model model, @AuthenticationPrincipal User admin) {
-        model.addAttribute("admin", admin);
+    public String adminHomePage(Model model, @AuthenticationPrincipal UserDetails admin) {
+        this.admin = admin;
+        model.addAttribute("admin", this.admin);
         model.addAttribute("users", userService.findAll());
         model.addAttribute("roles", roleService.findALL());
 
@@ -55,11 +53,7 @@ public class AdminController {
 
         userValidator.validate(user,bindingResult);
 
-
         if(bindingResult.hasErrors()) {
-            User admin = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-            model.addAttribute("admin", admin);
             model.addAttribute("users", userService.findAll());
             model.addAttribute("roles", roleService.findALL());
             model.addAttribute("newUser", user);
@@ -79,7 +73,7 @@ public class AdminController {
                            @RequestParam(value = "role1", required = false) List<Integer> roles,
                             @AuthenticationPrincipal User admin){
         if(bindingResult.hasErrors()) {
-            return adminHomePage(model, admin);
+            return adminHomePage(model, this.admin);
         }
 
         user.setRoles(roles.stream().map(roleService::findOne).collect(Collectors.toList()));
