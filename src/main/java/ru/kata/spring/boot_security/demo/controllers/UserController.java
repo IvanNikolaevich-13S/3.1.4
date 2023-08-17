@@ -19,18 +19,16 @@ import ru.kata.spring.boot_security.demo.service.UserService;
 public class UserController {
     private final UserService userService;
 
+
+
     @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
     @GetMapping()
-    public String currentUserPage(Model model, @AuthenticationPrincipal UserDetails userDetails){
-        if(userDetails!=null){
-            String email = userDetails.getUsername();
-            User user = userService.findByEmail(email);
-            model.addAttribute("user",user);
-        }
+    public String currentUserPage(Model model, @AuthenticationPrincipal UserDetails user){
+        model.addAttribute("user",userService.findByEmail(user.getUsername()));
         return "user";
     }
 
